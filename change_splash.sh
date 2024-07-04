@@ -1,7 +1,5 @@
 #!/bin/bash
-
-//v03
-
+#v04
 # Check if running as root
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
@@ -58,6 +56,9 @@ TransitionDuration=0.0
 BackgroundStartColor=0x000000
 BackgroundEndColor=0x000000
 EOL
+
+# Ensure Plymouth is using the pix theme
+plymouth-set-default-theme pix
 
 # Update initramfs
 update-initramfs -u
