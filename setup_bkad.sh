@@ -182,4 +182,10 @@ User=bitk1
 ExecStart=/usr/local/bin/auto_pin_subnet.sh
 
 [Install]
-WantedBy=multi-user
+WantedBy=multi-user.target
+EOL
+
+sudo systemctl enable auto_pin_subnet.timer
+sudo systemctl start auto_pin_subnet.timer
+
+echo "Installation complete. Please reboot the system."
