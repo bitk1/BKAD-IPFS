@@ -1,10 +1,12 @@
 #!/bin/bash
 
+set -e
+
 # Update and install dependencies
 echo "Updating system and installing dependencies..."
 sudo apt-get update -y
 sudo apt-get upgrade -y
-sudo apt-get install -y wget tar ufw jq curl
+sudo apt-get install -y wget tar ufw jq curl lxde
 
 # Install IPFS
 echo "Installing IPFS..."
@@ -62,13 +64,20 @@ sudo chmod +x /home/bitk1/Desktop/ipfs-webui.desktop
 # Set desktop wallpaper
 echo "Setting desktop wallpaper..."
 WALLPAPER_PATH="/home/bitk1/bk_reverse.png"
-gsettings set org.gnome.desktop.background picture-uri "file://$WALLPAPER_PATH"
-gsettings set org.gnome.desktop.background picture-options 'centered'
-gsettings set org.gnome.desktop.background primary-color '#000000'
+sudo mkdir -p /home/bitk1/.config/pcmanfm/LXDE/
+sudo tee /home/bitk1/.config/pcmanfm/LXDE/desktop-items-0.conf > /dev/null <<EOL
+[*]
+wallpaper_mode=crop
+wallpaper=$WALLPAPER_PATH
+EOL
+
+# Restart LXDE desktop session
+sudo systemctl restart lightdm
 
 # Install and configure UFW
 echo "Installing and configuring UFW..."
 sudo apt-get install ufw -y
+echo "y" | sudo ufw enable
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 
@@ -81,7 +90,7 @@ sudo ufw allow from 192.168.0.0/16 to any port 4001 proto udp
 sudo ufw allow from 192.168.0.0/16 to any port 5001 proto tcp
 sudo ufw allow from 192.168.0.0/16 to any port 8080 proto tcp
 
-sudo ufw enable
+sudo ufw reload
 
 # Install IPFS Cluster
 echo "Installing IPFS Cluster..."
@@ -103,6 +112,7 @@ sudo tee /etc/systemd/system/ipfs-cluster.service > /dev/null <<EOL
 [Unit]
 Description=IPFS Cluster Service
 After=network.target
+Wants=ipfs.service
 
 [Service]
 User=bitk1
@@ -184,14 +194,4 @@ Description=Auto Pin IPFS Files from Other Nodes on the Same Subnet
 After=network.target
 
 [Service]
-User=bitk1
-ExecStart=/usr/local/bin/auto_pin_subnet.sh
-
-[Install]
-WantedBy=multi-user.target
-EOL
-
-sudo systemctl enable auto_pin_subnet.timer
-sudo systemctl start auto_pin_subnet.timer
-
-echo "Installation complete. Please reboot the system."
+User=bitk
