@@ -53,7 +53,7 @@ sudo tee /home/bitk1/Desktop/ipfs-webui.desktop > /dev/null <<EOL
 Name=IPFS Web UI
 Comment=Open IPFS Web UI
 Exec=xdg-open http://127.0.0.1:5001/webui
-Icon=utilities-terminal
+Icon=/home/bitk1/bk_circle_300.png
 Terminal=false
 Type=Application
 EOL
@@ -71,10 +71,16 @@ echo "Installing and configuring UFW..."
 sudo apt-get install ufw -y
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
+
+# Allow SSH access from the local subnet
+sudo ufw allow from 192.168.0.0/16 to any port 22 proto tcp
+
+# Allow IPFS ports from the local subnet
 sudo ufw allow from 192.168.0.0/16 to any port 4001 proto tcp
 sudo ufw allow from 192.168.0.0/16 to any port 4001 proto udp
 sudo ufw allow from 192.168.0.0/16 to any port 5001 proto tcp
 sudo ufw allow from 192.168.0.0/16 to any port 8080 proto tcp
+
 sudo ufw enable
 
 # Install IPFS Cluster
