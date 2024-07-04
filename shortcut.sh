@@ -1,16 +1,18 @@
 #!/bin/bash
-#v05
+#v06
 # Create the desktop shortcut file
-echo "[Desktop Entry]" >> ~/Desktop/BKAD-IPFS.desktop
-echo "Type=Application" >> ~/Desktop/BKAD-IPFS.desktop
-echo "Name=BKAD-IPFS" >> ~/Desktop/BKAD-IPFS.desktop
-echo "Comment=BKAD-IPFS Web Interface" >> ~/Desktop/BKAD-IPFS.desktop
-echo "Exec=xdg-open http://127.0.0.1:5001/webui" >> ~/Desktop/BKAD-IPFS.desktop
-echo "Icon=~/BKAD-IPFS/bk_circle_300.png" >> ~/Desktop/BKAD-IPFS.desktop
-echo "Terminal=false" >> ~/Desktop/BKAD-IPFS.desktop
+echo "[Desktop Entry]" >> /home/bitk1/Desktop/BKAD-IPFS.desktop
+echo "Type=Application" >> /home/bitk1/Desktop/BKAD-IPFS.desktop
+echo "Name=BKAD-IPFS" >> /home/bitk1/Desktop/BKAD-IPFS.desktop
+echo "Comment=BKAD-IPFS Web Interface" >> /home/bitk1/Desktop/BKAD-IPFS.desktop
+echo "Exec=xdg-open http://127.0.0.1:5001/webui" >> /home/bitk1/Desktop/BKAD-IPFS.desktop
+echo "Icon=/home/bitk1/BKAD-IPFS/bk_circle_300.png" >> /home/bitk1/Desktop/BKAD-IPFS.desktop
+echo "Terminal=false" >> /home/bitk1/Desktop/BKAD-IPFS.desktop
 
-# Remove the wastebasket icon
-rm ~/Desktop/Trash.desktop
+# Remove the wastebasket icon if it exists
+if [ -f /home/bitk1/Desktop/Trash.desktop ]; then
+    sudo rm /home/bitk1/Desktop/Trash.desktop
+fi
 
 # Make the file executable
-chmod +x ~/Desktop/BKAD-IPFS.desktop
+sudo chmod +x /home/bitk1/Desktop/BKAD-IPFS.desktop
