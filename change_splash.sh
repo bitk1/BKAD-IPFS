@@ -21,14 +21,12 @@ if [[ $(file -b --mime-type "$new_splash_path") != "image/png" ]]; then
     exit 1
 fi
 
-# Backup the original splash image
-cp /usr/share/plymouth/themes/pix/splash.png /usr/share/plymouth/themes/pix/splash.png.bak
-
 # Copy the new splash image
 cp "$new_splash_path" /usr/share/plymouth/themes/pix/splash.png
 
 # Set correct permissions
 chmod 644 /usr/share/plymouth/themes/pix/splash.png
+chmod 755 /usr/share/plymouth/themes/pix
 
 # Update config.txt
 if ! grep -q "disable_splash=0" /boot/firmware/config.txt; then
@@ -44,9 +42,6 @@ fi
 sed -i 's/quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0//g' /boot/firmware/cmdline.txt
 sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0/' /boot/firmware/cmdline.txt
 
-# Remove Raspberry Pi Desktop splashscreen package
-apt remove -y rpd-plym-splash
-
 # Create new Plymouth theme file
 cat > /usr/share/plymouth/themes/pix/pix.plymouth << EOL
 [Plymouth Theme]
@@ -59,18 +54,35 @@ ImageDir=/usr/share/plymouth/themes/pix
 ScriptFile=/usr/share/plymouth/themes/pix/pix.script
 EOL
 
-# Create new Plymouth script file
+# Create new Plymouth script file with aspect ratio preservation
 cat > /usr/share/plymouth/themes/pix/pix.script << EOL
 splash_image = Image("splash.png");
 screen_width = Window.GetWidth();
 screen_height = Window.GetHeight();
-resized_image = splash_image.Scale(screen_width, screen_height);
+
+image_width = splash_image.GetWidth();
+image_height = splash_image.GetHeight();
+
+scale_x = screen_width / image_width;
+scale_y = screen_height / image_height;
+scale = Math.Min(scale_x, scale_y);
+
+scaled_width = image_width * scale;
+scaled_height = image_height * scale;
+
+x = (screen_width - scaled_width) / 2;
+y = (screen_height - scaled_height) / 2;
+
+resized_image = splash_image.Scale(scaled_width, scaled_height);
 sprite = Sprite(resized_image);
-sprite.SetPosition(0, 0, 0);
+sprite.SetPosition(x, y, 0);
 EOL
 
 # Set Plymouth theme and update initramfs
 plymouth-set-default-theme -R pix
+
+# Update initramfs
+update-initramfs -u
 
 echo "Splash screen updated successfully!"
 echo "Reboot your Raspberry Pi to see the changes."
