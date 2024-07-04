@@ -2,6 +2,10 @@
 
 set -e
 
+# Stop IPFS service if it's running
+echo "Stopping IPFS service if it's running..."
+sudo systemctl stop ipfs || true
+
 # Update and install dependencies
 echo "Updating system and installing dependencies..."
 sudo apt-get update -y
@@ -208,4 +212,4 @@ EOL
 sudo systemctl enable auto_pin_subnet.timer
 sudo systemctl start auto_pin_subnet.timer
 
-echo "Installation complete. Please reboot the system."
+echo "Installation complete.
