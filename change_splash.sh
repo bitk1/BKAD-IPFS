@@ -1,8 +1,8 @@
 #!/bin/bash
-#v04
+#v05
 # Check if running as root
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root"
   exit
 fi
 
@@ -27,6 +27,9 @@ cp /usr/share/plymouth/themes/pix/splash.png /usr/share/plymouth/themes/pix/spla
 # Copy the new splash image
 cp "$new_splash_path" /usr/share/plymouth/themes/pix/splash.png
 
+# Set correct permissions
+chmod 644 /usr/share/plymouth/themes/pix/splash.png
+
 # Update config.txt
 if ! grep -q "disable_splash=0" /boot/firmware/config.txt; then
     echo "disable_splash=0" >> /boot/firmware/config.txt
@@ -37,31 +40,37 @@ else
     sed -i 's/gpu_mem=.*/gpu_mem=128/' /boot/firmware/config.txt
 fi
 
-# Update cmdline.txt
+# Clean up and update cmdline.txt
+sed -i 's/quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0//g' /boot/firmware/cmdline.txt
 sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0/' /boot/firmware/cmdline.txt
+
+# Remove Raspberry Pi Desktop splashscreen package
+apt remove -y rpd-plym-splash
 
 # Create new Plymouth theme file
 cat > /usr/share/plymouth/themes/pix/pix.plymouth << EOL
 [Plymouth Theme]
 Name=Pix
 Description=Custom splash theme
-ModuleName=two-step
+ModuleName=script
 
-[two-step]
+[script]
 ImageDir=/usr/share/plymouth/themes/pix
-HorizontalAlignment=.5
-VerticalAlignment=.5
-Transition=none
-TransitionDuration=0.0
-BackgroundStartColor=0x000000
-BackgroundEndColor=0x000000
+ScriptFile=/usr/share/plymouth/themes/pix/pix.script
 EOL
 
-# Ensure Plymouth is using the pix theme
-plymouth-set-default-theme pix
+# Create new Plymouth script file
+cat > /usr/share/plymouth/themes/pix/pix.script << EOL
+splash_image = Image("splash.png");
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+resized_image = splash_image.Scale(screen_width, screen_height);
+sprite = Sprite(resized_image);
+sprite.SetPosition(0, 0, 0);
+EOL
 
-# Update initramfs
-update-initramfs -u
+# Set Plymouth theme and update initramfs
+plymouth-set-default-theme -R pix
 
 echo "Splash screen updated successfully!"
 echo "Reboot your Raspberry Pi to see the changes."
