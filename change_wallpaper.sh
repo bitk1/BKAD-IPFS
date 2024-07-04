@@ -1,5 +1,5 @@
 #!/bin/bash
-#v01
+#v02
 # Define the path to the new wallpaper image
 WALLPAPER="/home/bitk1/BKAD-IPFS/wallpaper.png"
 
@@ -14,7 +14,7 @@ CONFIG_DIR="$HOME/.config/pcmanfm/LXDE-pi"
 mkdir -p "$CONFIG_DIR"
 
 # Configure wallpaper settings for LXDE-pi profile
-CONFIG_FILE="$CONFIG_DIR/pcmanfm.conf"
+CONFIG_FILE="$CONFIG_DIR/desktop-items-0.conf"
 
 # Create or modify pcmanfm configuration to set the wallpaper
 {
@@ -26,6 +26,12 @@ CONFIG_FILE="$CONFIG_DIR/pcmanfm.conf"
     echo "desktop_shadow=#000000" # Set desktop icon shadow color to black
     echo "desktop_font=Sans 12"   # Example: Set desktop font (adjust as needed)
 } > "$CONFIG_DIR/desktop-items-0.conf"
+
+# Check for DISPLAY environment variable
+if [ -z "$DISPLAY" ]; then
+    echo "No DISPLAY variable set. Cannot configure wallpaper using pcmanfm without a graphical session."
+    exit 1
+fi
 
 # Use pcmanfm to apply the wallpaper settings
 pcmanfm --reconfigure --profile LXDE-pi
