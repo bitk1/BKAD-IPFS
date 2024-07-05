@@ -6,46 +6,49 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Backup original files
-cp /etc/xdg/lxpanel/LXDE-pi/panels/panel /etc/xdg/lxpanel/LXDE-pi/panels/panel.bak
-cp /etc/xdg/lxsession/LXDE-pi/autostart /etc/xdg/lxsession/LXDE-pi/autostart.bak
-
-# Modify the panel configuration to hide the taskbar
-sed -i 's/autohide=0/autohide=1/' /etc/xdg/lxpanel/LXDE-pi/panels/panel
-sed -i 's/heightwhenhidden=2/heightwhenhidden=1/' /etc/xdg/lxpanel/LXDE-pi/panels/panel
-
-# Remove the taskbar plugin
-sed -i '/type=taskbar/,/}/d' /etc/xdg/lxpanel/LXDE-pi/panels/panel
-
-# Ensure lxpanel starts in the system-wide autostart
-sed -i 's/^@#lxpanel/@lxpanel/' /etc/xdg/lxsession/LXDE-pi/autostart
-
-# Update user-specific autostart for all users in /home
-for user_home in /home/*; do
-  if [ -d "$user_home" ]; then
-    username=$(basename "$user_home")
-    autostart_dir="$user_home/.config/lxsession/LXDE-pi"
-    autostart_file="$autostart_dir/autostart"
-    
-    # Create directory if it doesn't exist
-    sudo -u "$username" mkdir -p "$autostart_dir"
-    
-    # If autostart file doesn't exist, create it with lxpanel entry
-    if [ ! -f "$autostart_file" ]; then
-      echo "@lxpanel --profile LXDE-pi" | sudo -u "$username" tee "$autostart_file" > /dev/null
-    else
-      # If file exists, add lxpanel entry if not present
-      if ! grep -q "@lxpanel --profile LXDE-pi" "$autostart_file"; then
-        sed -i '1i@lxpanel --profile LXDE-pi' "$autostart_file"
-      fi
+# Function to backup a file
+backup_file() {
+    if [ -f "$1" ]; then
+        cp "$1" "$1.bak_$(date +%Y%m%d_%H%M%S)"
+        echo "Backup created for $1"
     fi
-    
-    echo "Updated autostart for user: $username"
-  fi
-done
+}
 
-echo "Taskbar has been configured to hide for all users."
-echo "The system will now reboot for changes to take effect."
+# Backup and modify wayfire.ini
+WAYFIRE_CONFIG="/home/bitk1/.config/wayfire.ini"
+backup_file "$WAYFIRE_CONFIG"
 
-# Reboot the system
-reboot
+if grep -q "\[panel\]" "$WAYFIRE_CONFIG"; then
+    sed -i '/\[panel\]/,/^$/c\[panel]\nautohide = true\nposition = top' "$WAYFIRE_CONFIG"
+else
+    echo -e "\n[panel]\nautohide = true\nposition = top" >> "$WAYFIRE_CONFIG"
+fi
+
+echo "Updated $WAYFIRE_CONFIG"
+
+# Backup and modify wf-panel-pi.ini
+PANEL_CONFIG="/home/bitk1/.config/wf-panel-pi.ini"
+backup_file "$PANEL_CONFIG"
+
+if grep -q "\[panel\]" "$PANEL_CONFIG"; then
+    sed -i '/\[panel\]/,/^$/c\[panel]\nautohide = true\nautohide_duration = 300' "$PANEL_CONFIG"
+else
+    sed -i '1i[panel]\nautohide = true\nautohide_duration = 300\n' "$PANEL_CONFIG"
+fi
+
+echo "Updated $PANEL_CONFIG"
+
+# Check for additional Wayfire configuration files
+WAYFIRE_XDG_CONFIG="/etc/xdg/wayfire"
+if [ -d "$WAYFIRE_XDG_CONFIG" ]; then
+    echo "Additional Wayfire configuration files found in $WAYFIRE_XDG_CONFIG:"
+    ls -l "$WAYFIRE_XDG_CONFIG"
+    echo "You may need to check these files for panel-related settings."
+fi
+
+# Ensure correct ownership of modified files
+chown bitk1:bitk1 "$WAYFIRE_CONFIG" "$PANEL_CONFIG"
+
+echo "Configuration files have been updated to auto-hide the panel."
+echo "Please reboot your system for changes to take effect."
+echo "You can reboot by running: sudo reboot"
