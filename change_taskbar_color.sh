@@ -1,15 +1,25 @@
 #!/bin/bash
 
-# Change the taskbar color to black for all users
+# Change the taskbar color to black
 sed -i 's/tintcolor=#000000/tintcolor=#000000/g' /etc/xdg/lxpanel/LXDE-pi/panels/panel
 
-# Update user-specific configuration files
-for user in /home/*; do
-    if [ -d "$user" ]; then
-        user_name=$(basename "$user")
-        user_config_file="/home/$user_name/.config/lxpanel/LXDE-pi/panels/panel"
-        if [ -f "$user_config_file" ]; then
-            sed -i 's/tintcolor=#000000/tintcolor=#000000/g' "$user_config_file"
-        fi
-    fi
-done
+# Ensure lxpanel is installed
+sudo apt update
+sudo apt install lxpanel
+
+# Ensure lxpanel is enabled
+sudo systemctl enable lxpanel
+
+# Start lxpanel
+sudo systemctl start lxpanel
+
+# Check if there are any errors in the lxpanel logs
+sudo journalctl -u lxpanel
+
+# Check if there are any other configuration files overriding your changes
+sudo grep -r "tintcolor" /etc/xdg/lxpanel/
+grep -r "tintcolor" ~/.config/lxpanel/
+
+# Check if there are any other services or processes overriding your changes
+ps -ef | grep lxpanel
+sudo systemctl list-units | grep lxpanel
