@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change the taskbar color to black
-sed -i 's/tintcolor=#000000/tintcolor=#000000/g' /etc/xdg/lxpanel/LXDE-pi/panels/panel
+sudo sed -i 's/tintcolor=#000000/tintcolor=#000000/g' /etc/xdg/lxpanel/LXDE-pi/panels/panel
 
 # Ensure lxpanel is installed
 sudo apt update
@@ -11,7 +11,7 @@ sudo apt install lxpanel
 sudo systemctl enable lxpanel
 
 # Restart lxpanel
-lxpanelctl --restart
+sudo lxpanelctl --restart
 
 # Check if there are any errors in the lxpanel logs
 sudo journalctl -u lxpanel
