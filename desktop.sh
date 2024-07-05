@@ -1,8 +1,8 @@
 #!/bin/bash
-#v05
+#v07
 # Set desktop to dark mode
-echo "[GTK]" >> ~/.config/lxsession/LXDE/desktop.conf
-echo "theme=Dark" >> ~/.config/lxsession/LXDE/desktop.conf
+echo "[GTK]" >> $HOME/.config/lxsession/LXDE/desktop.conf
+echo "theme=Dark" >> $HOME/.config/lxsession/LXDE/desktop.conf
 
 # Hide Wastebasket icon
-echo "show_trash=0" >> ~/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+echo "show_trash=0" >> $HOME/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
