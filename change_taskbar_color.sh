@@ -10,8 +10,8 @@ sudo apt install lxpanel
 # Ensure lxpanel is enabled
 sudo systemctl enable lxpanel
 
-# Start lxpanel
-sudo systemctl start lxpanel
+# Restart lxpanel
+lxpanelctl --restart
 
 # Check if there are any errors in the lxpanel logs
 sudo journalctl -u lxpanel
