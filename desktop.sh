@@ -3,6 +3,14 @@
 # Set HOME variable explicitly
 HOME=/home/bitk1
 
+# Create lxsession and LXDE directories if they do not exist
+if [ ! -d $HOME/.config/lxsession ]; then
+    mkdir -p $HOME/.config/lxsession
+fi
+if [ ! -d $HOME/.config/lxsession/LXDE ]; then
+    mkdir -p $HOME/.config/lxsession/LXDE
+fi
+
 # Create desktop.conf file if it does not exist
 if [ ! -f $HOME/.config/lxsession/LXDE/desktop.conf ]; then
     touch $HOME/.config/lxsession/LXDE/desktop.conf
