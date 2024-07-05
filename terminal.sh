@@ -1,14 +1,8 @@
 #!/bin/bash
 
-# Determine correct home directory based on whether the script is run with 'sudo'
-if [ "$SUDO_USER" ]; then
-    HOME_DIR=$(getent passwd "$SUDO_USER" | cut -d: -f6)
-else
-    HOME_DIR=$HOME
-fi
-
-DESKTOP_DIR="$HOME_DIR/Desktop"
-SHORTCUT_FILE="$DESKTOP_DIR/Terminal.desktop"
+# Define the Desktop directory and shortcut file
+DESKTOP_DIR="$HOME/Desktop"
+SHORTCUT_FILE="$DESKTOP_DIR/Terminal.desktop"  # The file ends with .desktop to function, but the name field controls display
 
 # Ensure the Desktop directory exists
 mkdir -p "$DESKTOP_DIR"
