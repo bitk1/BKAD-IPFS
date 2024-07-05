@@ -19,4 +19,10 @@ if [ -f ~/.config/wayfire/autostart ]; then
     sed -i 's/wfrespawn wf-panel-pi//' ~/.config/wayfire/autostart
 fi
 
+# Disable any systemd services related to the panel
+systemctl --user disable --now wf-panel.service 2>/dev/null
+
+# Remove executable permissions from panel binary
+sudo chmod -x /usr/bin/wf-panel-pi
+
 echo "Panel removal complete. Please reboot or restart your Wayfire session for changes to take effect."
