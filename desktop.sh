@@ -18,5 +18,5 @@ if [ ! -f $HOME/.config/lxpanel/LXDE/panels ]; then
     touch $HOME/.config/lxpanel/LXDE/panels
 fi
 
-# Hide taskbar
-echo "taskbar.hide=1" >> $HOME/.config/lxpanel/LXDE/panels
+# Change taskbar color to black
+echo "bg.color=#000000" >> $HOME/.config/lxpanel/LXDE/panels
