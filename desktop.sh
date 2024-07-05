@@ -1,5 +1,5 @@
 #!/bin/bash
-#v03
+#v05
 # Set desktop to dark mode
 echo "[GTK]" >> ~/.config/lxsession/LXDE/desktop.conf
 echo "theme=Dark" >> ~/.config/lxsession/LXDE/desktop.conf
