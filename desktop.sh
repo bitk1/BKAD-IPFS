@@ -1,5 +1,8 @@
 #!/bin/bash
-#v07
+#v08
+# Set HOME variable explicitly
+HOME=/home/bitk1
+
 # Set desktop to dark mode
 echo "[GTK]" >> $HOME/.config/lxsession/LXDE/desktop.conf
 echo "theme=Dark" >> $HOME/.config/lxsession/LXDE/desktop.conf
