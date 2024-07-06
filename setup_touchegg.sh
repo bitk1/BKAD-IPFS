@@ -1,39 +1,22 @@
 #!/bin/bash
 
-# Update the package list
-echo "Updating package list..."
-sudo apt-get update
+# Define correct DISPLAY and XAUTHORITY for GUI applications run as sudo
+export DISPLAY=:0
+export XAUTHORITY=/home/bitk1/.Xauthority
 
-# Install Touchegg
-echo "Installing Touchegg..."
-sudo apt-get install -y touchegg
+# Ensure the Openbox directory exists and the script can write to it
+CONFIG_FILE="/home/bitk1/.config/openbox/lxde-pi-rc.xml"
+sudo mkdir -p "$(dirname "$CONFIG_FILE")"
+sudo touch "$CONFIG_FILE"
+sudo chown $USER: "$CONFIG_FILE"
 
-# Configuration directory setup
-CONFIG_DIR="$HOME/.config/touchegg"
-mkdir -p "$CONFIG_DIR"
+# Add a menu item to the Openbox configuration
+if ! grep -q 'label="Open Terminal"' "$CONFIG_FILE"; then
+    sudo awk '/<\/menu>/ {print "      <item label=\"Open Terminal\">\n        <action name=\"Execute\">\n          <command>lxterminal</command>\n        </action>\n      </item>"}1' "$CONFIG_FILE" > "${CONFIG_FILE}.tmp" && sudo mv "${CONFIG_FILE}.tmp" "$CONFIG_FILE"
+    echo "Terminal entry added to the context menu."
+else
+    echo "Terminal entry already exists."
+fi
 
-# Create Touchegg configuration file
-CONFIG_FILE="$CONFIG_DIR/touchegg.conf"
-echo "Creating Touchegg configuration file..."
-
-cat > "$CONFIG_FILE" << EOF
-<touchégg>
-    <settings>
-        <property name="composed_gestures_time">0</property>
-    </settings>
-    <application name="All">
-        <!-- Long press with one finger to simulate right click -->
-        <gesture type="long_press" fingers="1" duration="500">
-            <action type="mouse_click">BUTTON=3</action>
-        </gesture>
-    </application>
-</touchégg>
-EOF
-
-echo "Touchegg has been configured to treat long press as a right-click."
-
-# Start Touchegg
-echo "Starting Touchegg..."
-touchegg &
-
-echo "Touchegg is now running. Long press should simulate a right-click."
+# Reload Openbox configuration
+sudo openbox --reconfigure
