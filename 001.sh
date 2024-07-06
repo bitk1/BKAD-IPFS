@@ -1,20 +1,30 @@
 #!/bin/bash
 
-# Install Touchegg if not already installed
-if ! which touchegg > /dev/null; then
-    echo "Installing Touchegg..."
-    sudo apt-get update
-    sudo apt-get install -y touchegg
-else
-    echo "Touchegg is already installed."
-fi
+# Updating system and installing necessary packages
+echo "Updating package list and installing necessary build tools and libraries..."
+sudo apt-get update
+sudo apt-get install -y git cmake g++ libinput-dev libgtk-3-dev libqt5x11extras5-dev qttools5-dev qttools5-dev-tools libqt5svg5-dev
 
-# Configuration for Touchegg (assuming default config location and structure)
+# Cloning Touchegg repository
+echo "Cloning Touchegg from GitHub..."
+git clone https://github.com/JoseExposito/touchegg.git
+
+# Navigating to the Touchegg directory and compiling the source
+echo "Compiling Touchegg..."
+cd touchegg
+cmake .
+make
+
+# Installing Touchegg
+echo "Installing Touchegg..."
+sudo make install
+
+# Creating configuration file for Touchegg
+echo "Creating Touchegg configuration..."
 CONFIG_DIR="$HOME/.config/touchegg"
 mkdir -p "$CONFIG_DIR"
 CONFIG_FILE="$CONFIG_DIR/touchegg.conf"
 
-echo "Creating Touchegg configuration..."
 cat > "$CONFIG_FILE" << EOF
 <touchégg>
     <settings>
@@ -28,7 +38,5 @@ cat > "$CONFIG_FILE" << EOF
 </touchégg>
 EOF
 
-# Start Touchegg
-echo "Starting Touchegg..."
-touchegg &
-echo "Touchegg configuration completed and service started."
+# Inform user of completion
+echo "Touchegg installation and configuration complete. You can start it by running 'touchegg &'."
