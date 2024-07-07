@@ -2,8 +2,14 @@
 
 # Script to add "Open Terminal Here" to the desktop right-click menu on Raspberry Pi OS LXDE environment
 
-# Step 1: Create a desktop entry for lxterminal
-cat << EOF | sudo tee /usr/share/applications/lxterminal-here.desktop
+# Ensure running as root
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
+# Step 1: Create a global desktop entry for lxterminal
+cat << EOF | sudo tee /usr/share/applications/lxterminal-here.desktop > /dev/null
 [Desktop Entry]
 Type=Application
 Name=Open Terminal Here
@@ -13,23 +19,22 @@ Exec=lxterminal
 Terminal=false
 EOF
 
-# Step 2: Modify the PCManFM configuration
-# Check if the config directory exists, if not create it
-if [ ! -d ~/.config/libfm ]; then
-    mkdir -p ~/.config/libfm
+# Step 2: Ensure global configuration for PCManFM is adapted
+# This targets the default settings for all users
+GLOBAL_CONFIG="/etc/xdg/libfm/libfm.conf"
+if [ ! -f "$GLOBAL_CONFIG" ]; then
+    sudo mkdir -p "$(dirname "$GLOBAL_CONFIG")"
+    echo "[desktop]" | sudo tee "$GLOBAL_CONFIG" > /dev/null
 fi
 
-# Append or modify quick_exec in libfm.conf
-if grep -q "\[desktop\]" ~/.config/libfm/libfm.conf; then
-    # If desktop section exists, ensure quick_exec is set
-    sed -i '/^\[desktop\]$/,/^\[/ s/^quick_exec=.*$/quick_exec=1/' ~/.config/libfm/libfm.conf
+if grep -q "\[desktop\]" "$GLOBAL_CONFIG"; then
+    sudo sed -i '/^\[desktop\]$/,/^\[/ s/^quick_exec=.*$/quick_exec=1/' "$GLOBAL_CONFIG"
 else
-    # If no desktop section, append it
-    echo -e "[desktop]\nquick_exec=1" >> ~/.config/libfm/libfm.conf
+    echo "quick_exec=1" | sudo tee -a "$GLOBAL_CONFIG" > /dev/null
 fi
 
-# Step 3: Restart PCManFM to apply changes
+# Step 3: Restart PCManFM to apply changes globally
 pkill pcmanfm
-pcmanfm --desktop &
+sudo -u pi pcmanfm --desktop &  # Assuming the default user is 'pi', adjust as necessary for your setup
 
 echo "The 'Open Terminal Here' option has been added to the desktop context menu."
