@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# This script assumes it's run with root privileges or via sudo
+# This script sets up IPFS on a Raspberry Pi and ensures SSH access is preserved.
+# It is assumed that this script is run with root privileges.
 
 echo "Starting IPFS setup..."
 
@@ -21,7 +22,7 @@ fi
 
 # Create Systemd Service for IPFS
 echo "Configuring IPFS service..."
-cat <<EOF | tee /etc/systemd/system/ipfs.service
+cat <<EOF | sudo tee /etc/systemd/system/ipfs.service
 [Unit]
 Description=IPFS Daemon
 After=network.target
@@ -36,22 +37,24 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 
-# Reload systemd and start IPFS service
+# Reload systemd, enable and start IPFS service
 systemctl daemon-reload
 systemctl enable ipfs
-systemctl restart ipfs
+systemctl start ipfs
+
+# Install UFW if not installed
+apt-get update
+apt-get install -y ufw
 
 # Configure firewall
 echo "Configuring firewall rules..."
-apt-get install -y ufw
+ufw allow ssh
 ufw allow from 192.168.1.0/24 to any port 4001
 ufw allow from 192.168.1.0/24 to any port 5001
 ufw allow from 192.168.1.0/24 to any port 8080
-echo "y" | ufw enable
 
-# Wait for IPFS to start and check WebUI
-echo "Checking IPFS WebUI accessibility..."
-sleep 10
-curl -I http://localhost:5001/webui
+# Enable and reload firewall, ensure SSH is not disrupted
+echo "y" | ufw enable
+ufw reload
 
 echo "IPFS setup complete. Please verify WebUI is accessible via http://192.168.1.103:5001/webui/"
