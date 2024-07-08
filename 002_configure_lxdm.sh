@@ -6,13 +6,24 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
-# Automatically configure LXDM to start LXDE session
+# Configure LXDM to start LXDE session
 echo "Configuring LXDM to start LXDE session..."
 sed -i 's|^# session=.*|session=/usr/bin/startlxde|' /etc/lxdm/lxdm.conf
 
 # Automatically enable auto-login for user 'bitk1'
 echo "Enabling auto-login for user 'bitk1'..."
 sed -i 's|^# autologin=.*|autologin=bitk1|' /etc/lxdm/lxdm.conf
+
+# Check if the LXDM service file is properly configured to be enabled
+SERVICE_FILE="/lib/systemd/system/lxdm.service"
+if ! grep -q "\[Install\]" $SERVICE_FILE; then
+    echo "Adding missing [Install] section to LXDM service file..."
+    echo -e "\n[Install]\nWantedBy=graphical.target" >> $SERVICE_FILE
+fi
+
+# Reload systemd configurations
+echo "Reloading systemd configurations..."
+systemctl daemon-reload
 
 # Enable LXDM to start on boot
 echo "Enabling LXDM to start on boot..."
