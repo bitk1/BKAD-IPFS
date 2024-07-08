@@ -5,22 +5,29 @@ if [ "$(id -u)" -ne 0 ]; then
   exit
 fi
 
-# Use the current user's home directory for configuration files
+# Set the display and authorization for X server access
+export DISPLAY=:0
+export XAUTHORITY=/home/$SUDO_USER/.Xauthority
+
+# Configuration file path for the current user
 CONFIG_FILE="/home/$SUDO_USER/.config/pcmanfm/LXDE/pcmanfm.conf"
 
 # Ensure the configuration file exists
 if [ ! -f "$CONFIG_FILE" ]; then
+  echo "Configuration file not found, attempting to create it."
   mkdir -p "$(dirname "$CONFIG_FILE")"
-  echo "[*]" > "$CONFIG_FILE"
+  touch "$CONFIG_FILE"
 fi
 
 # Update configuration to hide the trash icon
-echo "[Desktop]" >> $CONFIG_FILE
-echo "show_trash=0" >> $CONFIG_FILE
-
-echo "Wastebasket icon removed from desktop."
+if grep -q "show_trash" "$CONFIG_FILE"; then
+    sed -i 's/show_trash=.*/show_trash=0/' "$CONFIG_FILE"
+else
+    echo "[Desktop]" >> "$CONFIG_FILE"
+    echo "show_trash=0" >> "$CONFIG_FILE"
+fi
 
 # Attempt to reload the desktop configuration
-export DISPLAY=:0
-export XAUTHORITY="/home/$SUDO_USER/.Xauthority"
 pcmanfm --reconfigure
+
+echo "Wastebasket icon removed from desktop."
