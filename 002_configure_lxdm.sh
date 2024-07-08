@@ -6,33 +6,16 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
-# Configure LXDM to start LXDE session
 echo "Configuring LXDM to start LXDE session..."
-sed -i 's|^# session=.*|session=/usr/bin/startlxde|' /etc/lxdm/lxdm.conf
-
-# Automatically enable auto-login for user 'bitk1'
-echo "Enabling auto-login for user 'bitk1'..."
+sed -i 's|^# session=.*|session=/usr/bin/startlxde-pi|' /etc/lxdm/lxdm.conf
 sed -i 's|^# autologin=.*|autologin=bitk1|' /etc/lxdm/lxdm.conf
 
-# Check if the LXDM service file is properly configured to be enabled
-SERVICE_FILE="/lib/systemd/system/lxdm.service"
-if ! grep -q "\[Install\]" $SERVICE_FILE; then
-    echo "Adding missing [Install] section to LXDM service file..."
-    echo -e "\n[Install]\nWantedBy=graphical.target" >> $SERVICE_FILE
-fi
+echo "Setting LXDE as the default session manager..."
+update-alternatives --set x-session-manager /usr/bin/startlxde-pi
 
-# Reload systemd configurations
-echo "Reloading systemd configurations..."
+echo "Reloading and restarting LXDM service..."
 systemctl daemon-reload
-
-# Enable LXDM to start on boot
-echo "Enabling LXDM to start on boot..."
 systemctl enable lxdm
-
-# Restart LXDM to apply changes
-echo "Restarting LXDM to apply changes..."
 systemctl restart lxdm
 
-echo "Configuration complete. A system reboot is recommended."
-echo "Rebooting now..."
-reboot
+echo "LXDM configuration complete. A system reboot is recommended."
