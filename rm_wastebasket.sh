@@ -1,20 +1,29 @@
 #!/bin/bash
 
-# Configuration file path
-CONFIG_FILE="/home/$USER/.config/pcmanfm/LXDE/pcmanfm.conf"
-
-# Ensure the configuration file exists
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "Configuration file not found, attempting to create it."
-  mkdir -p "$(dirname "$CONFIG_FILE")"
-  echo "[*]" > "$CONFIG_FILE"
+# Check if running as root
+if [ "$(id -u)" != "0" ]; then
+  echo "Please run as root"
+  exit
 fi
 
-# Update configuration to hide the trash icon
-echo "[Desktop]" >> $CONFIG_FILE
-echo "show_trash=0" >> $CONFIG_FILE
+# Configuration file path
+config_file="/etc/xdg/pcmanfm/LXDE/desktop-items-0.conf"
 
-# Reload PCManFM to apply changes
-pcmanfm --reconfigure
+# Backup the original configuration
+cp "$config_file" "${config_file}.bak"
+
+# Check if show_trash is already set
+if grep -q "show_trash=" "$config_file"; then
+    # If it exists, update it
+    sed -i 's/show_trash=.*/show_trash=0/' "$config_file"
+else
+    # If it doesn't exist, add it
+    echo "show_trash=0" >> "$config_file"
+fi
 
 echo "Wastebasket icon removed from desktop."
+
+# Attempt to reload the desktop configuration immediately
+export DISPLAY=:0
+export XAUTHORITY=~/.Xauthority
+pcmanfm --reconfigure

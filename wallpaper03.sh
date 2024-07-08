@@ -13,7 +13,9 @@ fi
 system_wallpaper_path="/usr/share/rpd-wallpaper/custom_wallpaper.png"
 cp "$new_wallpaper_path" "$system_wallpaper_path"
 
-# Update the LXDE configuration file
+# Pass the DISPLAY variable and update the LXDE configuration
+export DISPLAY=:0
+export XAUTHORITY=~/.Xauthority
 pcmanfm --set-wallpaper "$system_wallpaper_path" --profile LXDE
 
 echo "Desktop background updated successfully!"
