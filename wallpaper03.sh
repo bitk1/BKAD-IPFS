@@ -9,13 +9,13 @@ if [ ! -f "$new_wallpaper_path" ] || [[ $(file -b --mime-type "$new_wallpaper_pa
     exit 1
 fi
 
-# Copy the new wallpaper to a system-wide accessible location
+# Ensure script has permission to write to the wallpaper directory
 system_wallpaper_path="/usr/share/rpd-wallpaper/custom_wallpaper.png"
-cp "$new_wallpaper_path" "$system_wallpaper_path"
+sudo cp "$new_wallpaper_path" "$system_wallpaper_path"
 
 # Pass the DISPLAY variable and update the LXDE configuration
 export DISPLAY=:0
 export XAUTHORITY=~/.Xauthority
-pcmanfm --set-wallpaper "$system_wallpaper_path" --profile LXDE
+pcmanfm --set-wallpaper "$system_wallpaper_path" --wallpaper-mode=fit --profile LXDE
 
 echo "Desktop background updated successfully!"

@@ -1,29 +1,26 @@
 #!/bin/bash
 
-# Check if running as root
-if [ "$(id -u)" != "0" ]; then
+if [ "$(id -u)" -ne 0 ]; then
   echo "Please run as root"
   exit
 fi
 
-# Configuration file path
-config_file="/etc/xdg/pcmanfm/LXDE/desktop-items-0.conf"
+# Use the current user's home directory for configuration files
+CONFIG_FILE="/home/$SUDO_USER/.config/pcmanfm/LXDE/pcmanfm.conf"
 
-# Backup the original configuration
-cp "$config_file" "${config_file}.bak"
-
-# Check if show_trash is already set
-if grep -q "show_trash=" "$config_file"; then
-    # If it exists, update it
-    sed -i 's/show_trash=.*/show_trash=0/' "$config_file"
-else
-    # If it doesn't exist, add it
-    echo "show_trash=0" >> "$config_file"
+# Ensure the configuration file exists
+if [ ! -f "$CONFIG_FILE" ]; then
+  mkdir -p "$(dirname "$CONFIG_FILE")"
+  echo "[*]" > "$CONFIG_FILE"
 fi
+
+# Update configuration to hide the trash icon
+echo "[Desktop]" >> $CONFIG_FILE
+echo "show_trash=0" >> $CONFIG_FILE
 
 echo "Wastebasket icon removed from desktop."
 
-# Attempt to reload the desktop configuration immediately
+# Attempt to reload the desktop configuration
 export DISPLAY=:0
-export XAUTHORITY=~/.Xauthority
+export XAUTHORITY="/home/$SUDO_USER/.Xauthority"
 pcmanfm --reconfigure
