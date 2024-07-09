@@ -11,13 +11,17 @@ echo "Installing Waybar and its dependencies..."
 apt-get update
 apt-get install -y waybar
 
+# User setup (replace 'bitk1' with your actual username if different)
+USER_HOME=/home/bitk1
+USER_NAME=bitk1
+
 # Configuration directories setup
 echo "Setting up configuration directories for Waybar..."
-mkdir -p ~/.config/waybar
+mkdir -p $USER_HOME/.config/waybar
 
 # Create Waybar's configuration JSON file
 echo "Creating Waybar configuration files..."
-cat > ~/.config/waybar/config <<EOF
+cat > $USER_HOME/.config/waybar/config <<EOF
 {
     "layer": "top",
     "position": "bottom",
@@ -34,7 +38,7 @@ cat > ~/.config/waybar/config <<EOF
 EOF
 
 # Create a style CSS for Waybar
-cat > ~/.config/waybar/style.css <<EOF
+cat > $USER_HOME/.config/waybar/style.css <<EOF
 * {
     font-family: "sans-serif";
     font-size: 12px;
@@ -52,8 +56,8 @@ cat > ~/.config/waybar/style.css <<EOF
 EOF
 
 # Create the module for launching a terminal
-mkdir -p ~/.config/waybar/modules
-cat > ~/.config/waybar/modules/terminal.json <<EOF
+mkdir -p $USER_HOME/.config/waybar/modules
+cat > $USER_HOME/.config/waybar/modules/terminal.json <<EOF
 {
     "format": " Terminal",
     "tooltip": "Click to open terminal",
@@ -61,9 +65,12 @@ cat > ~/.config/waybar/modules/terminal.json <<EOF
 }
 EOF
 
-# Reload Waybar to apply changes
+# Adjust ownership to the correct user
+chown -R $USER_NAME:$USER_NAME $USER_HOME/.config/waybar
+
+# Restart Waybar if it's running
 echo "Reloading Waybar..."
-killall waybar
-waybar &
+killall -u $USER_NAME waybar
+sudo -u $USER_NAME waybar &
 
 echo "Waybar setup complete. Waybar should now be running with a custom terminal launcher."
