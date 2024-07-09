@@ -3,7 +3,7 @@
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root"
-  exit
+  exit 1
 fi
 
 # Set the path to the new wallpaper image
@@ -44,6 +44,9 @@ echo "Desktop background updated successfully!"
 echo "You may need to log out and log back in, or restart the Pi to see the changes."
 
 # Attempt to reload the desktop background immediately
-if command -v pcmanfm > /dev/null; then
-    su - pi -c "DISPLAY=:0 pcmanfm --reconfigure" || true
+CURRENT_USER=$(logname 2>/dev/null || echo $SUDO_USER)
+if [ -n "$CURRENT_USER" ] && command -v pcmanfm > /dev/null; then
+    su - $CURRENT_USER -c "DISPLAY=:0 pcmanfm --reconfigure" || echo "Failed to reconfigure pcmanfm, please reconfigure manually."
+else
+    echo "pcmanfm is not installed or no graphical user is detected. Manual reconfiguration may be required."
 fi
