@@ -18,6 +18,7 @@ USER_NAME=bitk1
 # Configuration directories setup
 echo "Setting up configuration directories for Waybar..."
 mkdir -p $USER_HOME/.config/waybar
+mkdir -p $USER_HOME/.config/autostart
 
 # Create Waybar's configuration JSON file
 echo "Creating Waybar configuration files..."
@@ -68,9 +69,15 @@ EOF
 # Adjust ownership to the correct user
 chown -R $USER_NAME:$USER_NAME $USER_HOME/.config/waybar
 
-# Restart Waybar if it's running
-echo "Reloading Waybar..."
-killall -u $USER_NAME waybar
-sudo -u $USER_NAME waybar &
+# Setup Waybar to start on login
+cat > $USER_HOME/.config/autostart/waybar.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Name=Waybar
+Exec=waybar
+X-GNOME-Autostart-enabled=true
+EOF
 
-echo "Waybar setup complete. Waybar should now be running with a custom terminal launcher."
+chown $USER_NAME:$USER_NAME $USER_HOME/.config/autostart/waybar.desktop
+
+echo "Waybar setup complete. Waybar should now be running with a custom terminal launcher after login."
