@@ -6,11 +6,21 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
+# Prevent the script from running multiple times
+if pidof -o %PPID -x "$0"; then
+   echo "This script is already running."
+   exit 1
+fi
+
 echo "Starting full setup..."
 
 # Update and upgrade system packages
 echo "Updating and upgrading system packages..."
 apt update && apt upgrade -y
+if [ $? -ne 0 ]; then
+    echo "Update or upgrade failed, stopping script to avoid potential issues."
+    exit 1
+fi
 
 # Run each script in order
 echo "Running shortcut setup..."
@@ -40,7 +50,7 @@ echo "A reboot is recommended to apply all changes effectively."
 # Offer to reboot
 echo "Do you want to reboot now? (y/n): "
 read response
-if [ "$response" == "y" ]; then
+if [[ "$response" == "y" || "$response" == "Y" ]]; then
     echo "Rebooting now..."
     reboot
 else
