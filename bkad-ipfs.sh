@@ -22,6 +22,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Setup the runtime directory
+echo "Setting up runtime directory..."
+./setup_runtime_dir.sh
+
 # Run each script in order
 echo "Running shortcut setup..."
 ./shortcut.sh
