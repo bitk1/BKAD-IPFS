@@ -8,6 +8,10 @@ fi
 
 echo "Starting full setup..."
 
+# Update and upgrade system packages
+echo "Updating and upgrading system packages..."
+apt update && apt upgrade -y
+
 # Run each script in order
 echo "Running shortcut setup..."
 ./shortcut.sh
