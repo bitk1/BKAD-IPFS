@@ -14,12 +14,8 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
-# Initialize state
-if [ ! -f $STATE_FILE ]; then
-    echo "START" > $STATE_FILE
-fi
-
-STATE=$(cat $STATE_FILE)
+# Read the current state, default to START if none found
+STATE=$(cat $STATE_FILE 2>/dev/null || echo "START")
 
 case $STATE in
     "START")
@@ -28,38 +24,37 @@ case $STATE in
         apt update && apt upgrade -y >> $LOG_FILE 2>&1
         echo "UPDATED" > $STATE_FILE
         log "System updated, a reboot is required to continue"
+        # Set to automatically continue after reboot
+        echo "@reboot root /path/to/bkad-ipfs.sh" >> /etc/cron.d/bkad-autoresume
         reboot
         ;;
     "UPDATED")
         log "Continuing setup after reboot..."
-        log "Running shortcut setup..."
+        # Remove cron job since it's no longer needed
+        sed -i '/bkad-autoresume/d' /etc/cron.d/bkad-autoresume
         ./shortcut.sh >> $LOG_FILE 2>&1
-        log "Changing splash screen..."
         ./change_splash.sh >> $LOG_FILE 2>&1
-        log "Updating wallpaper..."
         ./wallpaper03.sh >> $LOG_FILE 2>&1
-        log "Removing wastebasket icon..."
         ./rm_wastebasket02.sh >> $LOG_FILE 2>&1
-        log "Configuring taskbar..."
         ./taskbar.sh >> $LOG_FILE 2>&1
-        log "Setting up IPFS..."
         ./034setup_ipfs.sh >> $LOG_FILE 2>&1
-        log "Configuring Waybar..."
         ./bar.sh >> $LOG_FILE 2>&1
         echo "COMPLETED" > $STATE_FILE
         log "All configurations applied successfully!"
+        log "Do you want to reboot now to apply all changes? (y/n): "
+        read response
+        if [[ "$response" == "y" || "$response" == "Y" ]]; then
+            log "Rebooting now..."
+            reboot
+        else
+            log "Please reboot your system manually to apply changes."
+        fi
         ;;
     "COMPLETED")
         log "Setup was completed previously."
         ;;
+    *)
+        log "Unknown state: $STATE. Exiting..."
+        exit 1
+        ;;
 esac
-
-# Offer to reboot
-log "Do you want to reboot now to apply all changes? (y/n): "
-read response
-if [[ "$response" == "y" || "$response" == "Y" ]]; then
-    log "Rebooting now..."
-    reboot
-else
-    log "Please reboot your system manually to apply changes."
-fi
