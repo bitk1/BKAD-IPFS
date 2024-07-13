@@ -24,7 +24,7 @@ fi
 
 # Setup the runtime directory
 echo "Setting up runtime directory..."
-./setup_runtime_dir.sh
+source ./setup_runtime_dir.sh
 
 # Run each script in order
 echo "Running shortcut setup..."
@@ -49,10 +49,9 @@ echo "Configuring Waybar..."
 ./bar.sh
 
 echo "All configurations applied successfully!"
-echo "A reboot is recommended to apply all changes effectively."
 
 # Offer to reboot
-echo "Do you want to reboot now? (y/n): "
+echo "It is recommended to reboot your system now to apply all changes effectively. Would you like to reboot now? (y/n): "
 read response
 if [[ "$response" == "y" || "$response" == "Y" ]]; then
     echo "Rebooting now..."
