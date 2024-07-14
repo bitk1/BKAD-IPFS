@@ -1,10 +1,13 @@
 #!/bin/bash
 
-# Check if running as root
+# Ensure the script is run as root
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root"
   exit
 fi
+
+# Define username
+username="bitk1"  # Update this if the script needs to run for a different user
 
 # Path to the system-wide LXDE configuration file
 config_file="/etc/xdg/pcmanfm/LXDE-pi/desktop-items-0.conf"
@@ -25,6 +28,4 @@ echo "Wastebasket icon removed from desktop."
 echo "You may need to log out and log back in, or restart the Pi to see the changes."
 
 # Attempt to reload the desktop configuration immediately
-if command -v pcmanfm > /dev/null; then
-    su - pi -c "DISPLAY=:0 pcmanfm --reconfigure" || true
-fi
+DISPLAY=:0 pcmanfm --reconfigure 2>/dev/null || echo "Failed to reconfigure pcmanfm, please reconfigure manually."
